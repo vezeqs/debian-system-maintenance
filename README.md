@@ -1,87 +1,83 @@
 # Debian System Maintenance Script
 
-A simple, safe Bash script that updates, cleans, and repairs packages on Debian and Debian-based Linux systems (Ubuntu, Linux Mint, Pop!_OS, etc.).
+[![License](https://img.shields.io/github/license/slopmanufacturer/debian-system-maintenance)](LICENSE)
 
-## Features
+One command to update, clean and repair a Debian-based system. It shows you what
+will change, **asks before touching anything**, and tells you if a reboot is needed.
 
-- Refreshes package lists (retries up to 3 times on mirror hiccups) and performs a full system upgrade.
-- Removes unused packages including their leftover config files, and cleans the package cache.
-- Fixes broken package dependencies and interrupted `dpkg` states *before* upgrading.
-- Never stops on a prompt: keeps your existing config files and lets `needrestart` run unattended.
-- Checks if a system reboot is required.
-- Clear, color-coded output that auto-disables when piped.
-- Fails fast with `set -euo pipefail` and reports the failing command and exit status.
-- Safe to run repeatedly (idempotent).
+![demo](assets/demo.gif)
 
-## Prerequisites
-
-- A Debian-based Linux distribution (Debian, Ubuntu, Mint, Pop!_OS, …)
-- `sudo` or root privileges
-- Bash 4.0 or newer (default on all modern Debian systems)
-
-## Installation
+## Quick start
 
 ```bash
 git clone https://github.com/slopmanufacturer/debian-system-maintenance.git
 cd debian-system-maintenance
-chmod +x system-maintenance.sh
-```
-
-## Usage
-
-Run with root privileges:
-
-```bash
 sudo ./system-maintenance.sh
 ```
 
-It is safe to pipe or redirect the output (`sudo ./system-maintenance.sh | tee maintenance.log`), which also disables the colors.
+## What it does
 
-## What It Does
+| # | Step | Command |
+|---|------|---------|
+| 1 | Refresh package lists (3 attempts) | `apt-get update` |
+| 2 | Show what would change | `apt-get -s full-upgrade` |
+| 3 | **Ask for confirmation** | `Proceed? [y/N]` |
+| 4 | Repair an interrupted dpkg state | `dpkg --configure -a` |
+| 5 | Repair broken dependencies | `apt-get --fix-broken install -y` |
+| 6 | Upgrade everything | `apt-get full-upgrade -y` |
+| 7 | Remove unused packages **and their configs** | `apt-get autoremove --purge -y` |
+| 8 | Clean the package cache | `apt-get autoclean` |
+| 9 | Check for a pending reboot | `/var/run/reboot-required` |
 
-The script runs these steps in order:
+## The confirmation prompt
 
-1. `dpkg --configure -a` — finish any interrupted package configuration
-2. `apt-get update` — refresh the list of available packages (up to 3 attempts)
-3. `apt-get --fix-broken install -y` — repair broken dependencies
-4. `apt-get full-upgrade -y` — upgrade everything, including packages that need new or removed dependencies
-5. `apt-get autoremove --purge -y` — remove unused dependencies **and their config files**
-6. `apt-get autoclean` — delete obsolete downloaded package files
-7. Check `/var/run/reboot-required` and warn if a restart is needed
+Nothing is installed, removed or purged until you answer `y`. Before asking, the
+script prints how many packages would be upgraded and names any that would be
+removed or purged:
 
-Every `apt-get` call passes `-o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold`, so `dpkg` keeps your existing configuration files instead of stopping to ask. `NEEDRESTART_MODE=a` does the same for the `needrestart` hook on Debian 12+.
+![confirmation prompt](assets/confirm.png)
 
-Note that step 5 uses `--purge`: configuration files of removed packages are deleted too. If you want to keep them, drop `--purge` from that line.
+Answer anything but `y` and it exits with `nothing was changed`.
 
-## Example Output
+## Options
 
-```
--------- SYSTEM MAINTENANCE --------
-[INFO]  ==> Made by slopmanufacturer
-[INFO]  ==> Please check more of my scripts and code in https://github.com/slopmanufacturer
-[SYS] Thanks for using this! ( ˶⚈Ɛ⚈˵)
-------------------------------------
-[INFO]  [2026-10-29T21:23:20-05:00] starting maintenance
-[INFO]  ==> Fixing the dpkg state
-[INFO]  ==> Grabbing the new package lists
-[INFO]  ==> Fixing any broken files or packages
-[INFO]  ==> Fully upgrading the system
-[INFO]  ==> Removing useless ahh files
-[INFO]  ==> Taking out cache from the packages
-[OK] ==> No reboot required.
-[SUCCESS] Maintenance completed with no errors.
-------------------------------------
-[INFO]  ==> System update is over.
-[INFO]  ==> Find more scripts in https://github.com/slopmanufacturer
-[SYS] Thanks for using this! ( ˶⚈Ɛ⚈˵)
-```
+| Flag | Effect |
+|------|--------|
+| `-y`, `--yes` | Skip the confirmation prompt (cron, unattended runs) |
+| `-h`, `--help` | Show usage |
+
+Without `-y`, the script refuses to run if there is no terminal to confirm on,
+so a cron job fails loudly instead of upgrading silently.
+
+## Example
+
+A run against a stock `debian:12.1` container, 45 packages behind:
+
+![upgrade](assets/upgrade.png)
+
+## Requirements
+
+- Debian, Ubuntu, Mint, Pop!_OS or any Debian derivative
+- root (`sudo`)
+- Bash 4.0+ (default everywhere)
+
+## Safety notes
+
+- **Your config files are kept.** Every `apt-get` call passes
+  `-o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold`, so dpkg
+  never stops to ask which version of a config file to keep.
+- **`autoremove` runs with `--purge`**, so config files of removed packages are
+  deleted too. Drop `--purge` from that line if you would rather keep them.
+- **`needrestart` is set to automatic** (`NEEDRESTART_MODE=a`), so the Debian 12+
+  apt hook cannot block the upgrade.
+- **Safe to re-run.** Every step is idempotent; running it twice in a row is a no-op.
+- **Fails fast.** `set -euo pipefail` plus an `ERR` trap that reports the failing
+  command and its exit status.
 
 ## License
 
-This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+MIT — see [LICENSE](LICENSE).
 
 ## Author
 
 **slopmanufacturer** — [github.com/slopmanufacturer](https://github.com/slopmanufacturer)
-
-More scripts and projects: [github.com/slopmanufacturer](https://github.com/slopmanufacturer)

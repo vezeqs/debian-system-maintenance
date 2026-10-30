@@ -17,6 +17,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Nothing yet.
 
 
+## [1.1.0] - 2026-10-29
+
+### Added
+- Confirmation prompt before anything is installed, removed or purged. It prints how many packages would be upgraded and names the ones that would be removed or purged.
+- `-y`/`--yes` to skip the prompt and `-h`/`--help` to show usage.
+- The script refuses to run without a terminal unless `--yes` is given, so a cron job fails loudly instead of upgrading silently.
+- Demo GIF and screenshots in the README, recorded from a real run in a `debian:12.1` container.
+
+### Changed
+- `apt-get update` now runs before the dpkg repair, so the preview is based on current package lists.
+- README restructured around tables and short sections, with the demo at the top.
+- The script is stored with the executable bit set, so `git clone` then `sudo ./system-maintenance.sh` works without a manual `chmod`.
+
+### Fixed
+- Unknown options now exit with status 2 and print usage to stderr.
+
+
 ## [1.0.1] - 2026-10-29
 
 ### Fixed
@@ -54,6 +71,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Banner and footer with project branding and author links.
 
 
-[Unreleased]: https://github.com/slopmanufacturer/debian-system-maintenance/compare/v1.0.1...HEAD
+[Unreleased]: https://github.com/slopmanufacturer/debian-system-maintenance/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/slopmanufacturer/debian-system-maintenance/releases/tag/v1.1.0
 [1.0.1]: https://github.com/slopmanufacturer/debian-system-maintenance/releases/tag/v1.0.1
 [1.0.0]: https://github.com/slopmanufacturer/debian-system-maintenance/releases/tag/v1.0.0
