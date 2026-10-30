@@ -17,6 +17,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Nothing yet.
 
 
+## [1.0.1] - 2026-10-29
+
+### Fixed
+- Banner and footer no longer crash when the output is piped or redirected. With colors disabled the separator started with `-`, so `printf` parsed it as an option and the script aborted before doing any work.
+- The error trap now reports the failing command and its exit status. `$LINENO` inside a trap always expanded to the trap's own line, so every failure reported the same line number.
+- `full-upgrade` no longer stops on dpkg configuration-file prompts: `--force-confdef` and `--force-confold` are passed to apt, and `NEEDRESTART_MODE=a` keeps the `needrestart` hook on Debian 12+ from prompting.
+
+### Changed
+- `apt-get update` is retried up to 3 times before giving up, instead of aborting on the first transient mirror failure.
+- Banner and footer use a `SYSTEM MAINTENANCE` heading instead of the leftover `README` placeholder.
+
+### Documentation
+- README step order now matches the script.
+- Removed the documented `apt upgrade -y` step, which the script never ran.
+- Documented that `autoremove` runs with `--purge`.
+- Replaced the example output with real output from the script.
+
+
 ## [1.0.0] - 2026-10-09
 
 ### Added
@@ -36,5 +54,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Banner and footer with project branding and author links.
 
 
-[Unreleased]: https://github.com/slopmanufacturer/debian-system-maintenance/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/slopmanufacturer/debian-system-maintenance/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/slopmanufacturer/debian-system-maintenance/releases/tag/v1.0.1
 [1.0.0]: https://github.com/slopmanufacturer/debian-system-maintenance/releases/tag/v1.0.0

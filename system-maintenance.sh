@@ -6,6 +6,9 @@
 
 set -euo pipefail
 export DEBIAN_FRONTEND=noninteractive
+export NEEDRESTART_MODE=a
+
+APT_OPTS=(-y -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold)
 
 #color
 if [[ -t 1 ]]; then
@@ -36,14 +39,14 @@ if ! command -v apt-get >/dev/null 2>&1; then
 fi
 
 #banner
-printf "${YELLOW}--------------README---------------${NC}\n"
+printf '%s\n' "${YELLOW}-------- SYSTEM MAINTENANCE --------${NC}"
 info "==> Made by ${RED}slopmanufacturer${NC}"
 info "==> Please check more of my scripts and code in https://github.com/slopmanufacturer"
 yay "Thanks for using this! ${PINK}( ˶⚈Ɛ⚈˵)${NC}"
-printf "${YELLOW}-----------------------------------${NC}\n"
+printf '%s\n' "${YELLOW}------------------------------------${NC}"
 
 #Reports errors
-trap 'error "Aborted on line $LINENO"' ERR
+trap 'error "Aborted (status $?): $BASH_COMMAND"' ERR
 
 info "[$(date -Is)] starting maintenance"
 
@@ -52,17 +55,26 @@ info "==> Fixing the dpkg state"
 dpkg --configure -a
 
 info "==> Grabbing the new package lists"
-apt-get update
+for attempt in 1 2 3; do
+  if apt-get update; then break; fi
+  if (( attempt < 3 )); then
+    warn "==> apt-get update failed, retrying in 5s (attempt $attempt/3)"
+    sleep 5
+  else
+    error "==> apt-get update failed 3 times, giving up"
+    exit 1
+  fi
+done
 
 info "==> Fixing any broken files or packages"
-apt-get --fix-broken install -y
+apt-get "${APT_OPTS[@]}" --fix-broken install
 
 info "==> Fully upgrading the system"
-apt-get full-upgrade -y
+apt-get "${APT_OPTS[@]}" full-upgrade
 
 
 info "==> Removing useless ahh files"
-apt-get autoremove --purge -y
+apt-get "${APT_OPTS[@]}" autoremove --purge
 
 info "==> Taking out cache from the packages"
 apt-get autoclean
@@ -81,7 +93,7 @@ fi
 
 success "Maintenance completed with no errors."
 
-printf "${YELLOW}--------------README---------------${NC}\n"
+printf '%s\n' "${YELLOW}------------------------------------${NC}"
 
 info "==> System update is over."
 info "==> Find more scripts in ${PINK}https://github.com/slopmanufacturer${NC}"
