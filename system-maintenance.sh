@@ -9,6 +9,7 @@ export DEBIAN_FRONTEND=noninteractive
 export NEEDRESTART_MODE=a
 
 APT_OPTS=(-y -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold)
+ASSUME_YES=0
 
 #color
 if [[ -t 1 ]]; then
@@ -26,6 +27,22 @@ warn() { printf "${YELLOW}[WARNING]${NC} %s\n" "$*" >&2; }
 ok() { printf "${PURPLE}[OK]${NC} %s\n" "$*"; }
 yay() { printf "${PINK}[SYS]${NC} %s\n" "$*"; }
 success() { printf "${GREEN}[SUCCESS]${NC} %s\n" "$*"; }
+
+#options
+usage() {
+  printf 'Usage: sudo %s [-y|--yes] [-h|--help]\n' "$0"
+  printf '  -y, --yes   skip the confirmation prompt (unattended runs)\n'
+  printf '  -h, --help  show this help\n'
+}
+
+while (( $# )); do
+  case "$1" in
+    -y|--yes) ASSUME_YES=1 ;;
+    -h|--help) usage; exit 0 ;;
+    *) error "Unknown option: $1"; usage >&2; exit 2 ;;
+  esac
+  shift
+done
 
 #runs checks
 if [[ $EUID -ne 0 ]]; then
@@ -50,10 +67,6 @@ trap 'error "Aborted (status $?): $BASH_COMMAND"' ERR
 
 info "[$(date -Is)] starting maintenance"
 
-#the updating part
-info "==> Fixing the dpkg state"
-dpkg --configure -a
-
 info "==> Grabbing the new package lists"
 for attempt in 1 2 3; do
   if apt-get update; then break; fi
@@ -65,6 +78,42 @@ for attempt in 1 2 3; do
     exit 1
   fi
 done
+
+info "==> Checking what would change"
+if preview=$(apt-get "${APT_OPTS[@]}" -s full-upgrade 2>/dev/null); then
+  info "==> Packages to upgrade: $(grep -c '^Inst ' <<<"$preview" || true)"
+  removals=$(awk '/^Remv /{printf "%s ", $2}' <<<"$preview")
+  if [[ -n $removals ]]; then
+    warn "==> Packages to remove: $removals"
+  fi
+  if autorm=$(apt-get "${APT_OPTS[@]}" -s autoremove 2>/dev/null); then
+    purged=$(awk '/^Remv /{printf "%s ", $2}' <<<"$autorm")
+    if [[ -n $purged ]]; then
+      warn "==> Unused packages to purge: $purged"
+    fi
+  fi
+else
+  warn "==> Could not preview the upgrade, the dpkg state will be repaired first"
+fi
+
+if (( ASSUME_YES )); then
+  info "==> Running unattended (--yes)"
+else
+  if [[ ! -t 0 ]]; then
+    error "==> No terminal to confirm on, re-run with --yes for unattended use"
+    exit 1
+  fi
+  printf '%s' "${YELLOW}==> Proceed with these changes? [y/N] ${NC}"
+  read -r reply || reply=""
+  case "$reply" in
+    y|Y|yes|YES) ;;
+    *) info "==> Aborted, nothing was changed."; exit 0 ;;
+  esac
+fi
+
+#the updating part
+info "==> Fixing the dpkg state"
+dpkg --configure -a
 
 info "==> Fixing any broken files or packages"
 apt-get "${APT_OPTS[@]}" --fix-broken install
