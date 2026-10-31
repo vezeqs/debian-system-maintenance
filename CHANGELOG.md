@@ -8,13 +8,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Nothing yet.
+- `make check`: `bash -n`, shellcheck when it is installed, and three test
+  scripts. `tests/static.sh` fails if anything that changes the system moves
+  above the confirmation prompt; `tests/smoke.sh` covers `--help`, an unknown
+  option, and the non-root refusal; `tests/docs.sh` fails when the README stops
+  documenting a flag the script accepts.
+- CI runs `make check` on every push and pull request.
+- `AGENTS.md` and `AUDIT.md`.
 
 ### Changed
-- Nothing yet.
+- The README said the script "asks before touching anything". It refreshes the
+  package lists before the prompt, so the sentence now says what actually
+  happens: nothing is installed, removed or purged until you answer.
+- The banner, the clone URL, the badge, the author credit, and the changelog
+  links used the account's previous login. They use the current one.
 
 ### Fixed
-- Nothing yet.
+- The `[1.0.0]` changelog link pointed at a tag that does not exist. The heading
+  is plain text now.
 
 
 ## [1.1.0] - 2026-10-29
@@ -52,7 +63,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Replaced the example output with real output from the script.
 
 
-## [1.0.0] - 2026-10-09
+## 1.0.0 - 2026-10-09
 
 ### Added
 - Initial release.
@@ -71,7 +82,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Banner and footer with project branding and author links.
 
 
-[Unreleased]: https://github.com/slopmanufacturer/debian-system-maintenance/compare/v1.1.0...HEAD
-[1.1.0]: https://github.com/slopmanufacturer/debian-system-maintenance/releases/tag/v1.1.0
-[1.0.1]: https://github.com/slopmanufacturer/debian-system-maintenance/releases/tag/v1.0.1
-[1.0.0]: https://github.com/slopmanufacturer/debian-system-maintenance/releases/tag/v1.0.0
+[Unreleased]: https://github.com/vezeqs/debian-system-maintenance/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/vezeqs/debian-system-maintenance/releases/tag/v1.1.0
+[1.0.1]: https://github.com/vezeqs/debian-system-maintenance/releases/tag/v1.0.1

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # FOR DEBIAN / DEBIAN-BASED SYSTEMS!!
-# System Maintenance - slopmanufacturer
+# System Maintenance - codefactory
 #
 
 set -euo pipefail
@@ -57,8 +57,8 @@ fi
 
 #banner
 printf '%s\n' "${YELLOW}-------- SYSTEM MAINTENANCE --------${NC}"
-info "==> Made by ${RED}slopmanufacturer${NC}"
-info "==> Please check more of my scripts and code in https://github.com/slopmanufacturer"
+info "==> Made by ${RED}codefactory${NC}"
+info "==> Please check more of my scripts and code in https://github.com/vezeqs"
 yay "Thanks for using this! ${PINK}( ˶⚈Ɛ⚈˵)${NC}"
 printf '%s\n' "${YELLOW}------------------------------------${NC}"
 
@@ -145,5 +145,5 @@ success "Maintenance completed with no errors."
 printf '%s\n' "${YELLOW}------------------------------------${NC}"
 
 info "==> System update is over."
-info "==> Find more scripts in ${PINK}https://github.com/slopmanufacturer${NC}"
+info "==> Find more scripts in ${PINK}https://github.com/vezeqs${NC}"
 yay "Thanks for using this! ${PINK}( ˶⚈Ɛ⚈˵)${NC}"
