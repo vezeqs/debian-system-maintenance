@@ -1,16 +1,19 @@
 # Debian System Maintenance Script
 
-[![License](https://img.shields.io/github/license/slopmanufacturer/debian-system-maintenance)](LICENSE)
+[![License](https://img.shields.io/github/license/vezeqs/debian-system-maintenance)](LICENSE)
 
 One command to update, clean and repair a Debian-based system. It shows you what
-will change, **asks before touching anything**, and tells you if a reboot is needed.
+will change, **asks before installing, removing or purging anything**, and tells
+you if a reboot is needed. The package lists are refreshed before the prompt, so
+the preview is based on current lists; nothing is installed or removed until you
+answer.
 
 ![demo](assets/demo.gif)
 
 ## Quick start
 
 ```bash
-git clone https://github.com/slopmanufacturer/debian-system-maintenance.git
+git clone https://github.com/vezeqs/debian-system-maintenance.git
 cd debian-system-maintenance
 sudo ./system-maintenance.sh
 ```
@@ -80,4 +83,4 @@ MIT — see [LICENSE](LICENSE).
 
 ## Author
 
-**slopmanufacturer** — [github.com/slopmanufacturer](https://github.com/slopmanufacturer)
+**codefactory** — [github.com/vezeqs](https://github.com/vezeqs)
